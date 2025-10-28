@@ -1,0 +1,184 @@
+import flet as ft
+import math
+
+# === CLASSES DE FUNÇÕES ===
+class Funcao:
+    def __init__(self, nome):
+        self.nome = nome
+
+    def lei_formacao(self):
+        pass
+
+    def grafico_textual(self):
+        pass
+
+    def dominio_imagem(self):
+        pass
+
+
+class FuncaoAfim(Funcao):
+    def __init__(self, a, b):
+        super().__init__("Função Afim")
+        self.a = a
+        self.b = b
+
+    def lei_formacao(self):
+        return f"f(x) = {self.a}x + {self.b}"
+
+    def grafico_textual(self):
+        if self.a > 0:
+            return "O gráfico é uma reta crescente."
+        elif self.a < 0:
+            return "O gráfico é uma reta decrescente."
+        else:
+            return "O gráfico é uma reta constante (horizontal)."
+
+    def dominio_imagem(self):
+        return "Domínio: ℝ (todos os reais)\nImagem: ℝ (todos os reais)"
+
+    def calcular(self, x):
+        return self.a * x + self.b
+
+
+class FuncaoQuadratica(Funcao):
+    def __init__(self, a, b, c):
+        super().__init__("Função Quadrática")
+        self.a = a
+        self.b = b
+        self.c = c
+
+    def lei_formacao(self):
+        return f"f(x) = {self.a}x² + {self.b}x + {self.c}"
+
+    def grafico_textual(self):
+        if self.a > 0:
+            return "O gráfico é uma parábola voltada para cima."
+        elif self.a < 0:
+            return "O gráfico é uma parábola voltada para baixo."
+        else:
+            return "Não é uma função quadrática (a = 0)."
+
+    def dominio_imagem(self):
+        return "Domínio: ℝ (todos os reais)\nImagem: depende da concavidade da parábola."
+
+    def calcular(self, x):
+        return self.a * x**2 + self.b * x + self.c
+
+
+class FuncaoExponencial(Funcao):
+    def __init__(self, a, b):
+        super().__init__("Função Exponencial")
+        self.a = a
+        self.b = b
+
+    def lei_formacao(self):
+        return f"f(x) = {self.a} * {self.b}^x"
+
+    def grafico_textual(self):
+        if self.b > 1:
+            return "O gráfico é uma curva crescente."
+        elif 0 < self.b < 1:
+            return "O gráfico é uma curva decrescente."
+        else:
+            return "Não é uma função exponencial válida."
+
+    def dominio_imagem(self):
+        return "Domínio: ℝ (todos os reais)\nImagem: (0, +∞)"
+
+    def calcular(self, x):
+        return self.a * (self.b ** x)
+
+
+# === APLICAÇÃO FLET ===
+def main(page: ft.Page):
+    page.title = "Calculadora de Funções com POO"
+    page.theme_mode = "dark"
+    page.vertical_alignment = "center"
+    page.horizontal_alignment = "center"
+
+    # === TÍTULO ===
+    titulo = ft.Text("=== CALCULADORA DE FUNÇÕES COM POO ===", size=25, weight="bold")
+
+    # === IMAGEM DO POU ===
+    pou = ft.Image(
+        src="https://e7.pngegg.com/pngimages/695/318/png-clipart-pou-android-google-play-bazaar-video-game-smiley-thumbnail.png",  # link direto e confiável
+        width=180,
+        height=180,
+        fit=ft.ImageFit.CONTAIN,
+    )
+
+    # === ENTRADAS ===
+    tipo_funcao = ft.Dropdown(
+        label="Escolha o tipo de função",
+        options=[
+            ft.dropdown.Option("Função Afim"),
+            ft.dropdown.Option("Função Quadrática"),
+            ft.dropdown.Option("Função Exponencial"),
+        ]
+    )
+
+    entrada_a = ft.TextField(label="Valor de a", width=150)
+    entrada_b = ft.TextField(label="Valor de b", width=150)
+    entrada_c = ft.TextField(label="Valor de c (apenas quadrática)", width=200)
+    entrada_x = ft.TextField(label="Valor de x", width=150)
+
+    # === RESULTADOS ===
+    resultado = ft.Text("", size=16, selectable=True)
+
+    # === FUNÇÃO DE CÁLCULO ===
+    def calcular(e):
+        try:
+            # Define valor padrão se o usuário não escolher
+            if tipo_funcao.value is None or tipo_funcao.value == "":
+                tipo_funcao.value = "Função Afim"
+
+            a = float(entrada_a.value) if entrada_a.value else 0
+            b = float(entrada_b.value) if entrada_b.value else 0
+            c = float(entrada_c.value) if entrada_c.value else 0
+            x = float(entrada_x.value) if entrada_x.value else 0
+
+            if tipo_funcao.value == "Função Afim":
+                funcao = FuncaoAfim(a, b)
+            elif tipo_funcao.value == "Função Quadrática":
+                funcao = FuncaoQuadratica(a, b, c)
+            elif tipo_funcao.value == "Função Exponencial":
+                funcao = FuncaoExponencial(a, b)
+            else:
+                resultado.value = "Tipo de função inválido."
+                page.update()
+                return
+
+            f_x = funcao.calcular(x)
+            resultado.value = (
+                f"📘 {funcao.nome}\n"
+                f"🔹 Lei de formação: {funcao.lei_formacao()}\n"
+                f"🔹 Gráfico textual: {funcao.grafico_textual()}\n"
+                f"🔹 Domínio e imagem:\n{funcao.dominio_imagem()}\n\n"
+                f"➡ Para x = {x}, f(x) = {f_x}"
+            )
+
+        except Exception as erro:
+            resultado.value = f"⚠ Erro: {erro}"
+
+        page.update()
+
+    botao = ft.ElevatedButton("Gerar Função e Calcular", on_click=calcular)
+
+    # === LAYOUT ===
+    page.add(
+        ft.Column(
+            [
+                titulo,
+                pou,  # imagem do Pou
+                tipo_funcao,
+                ft.Row([entrada_a, entrada_b, entrada_c, entrada_x], alignment="center"),
+                botao,
+                resultado
+            ],
+            alignment="center",
+            horizontal_alignment="center",
+            spacing=15,
+        )
+    )
+
+ft.app(target=main)
